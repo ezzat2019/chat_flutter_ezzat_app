@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
@@ -57,6 +58,7 @@ class AuthScreen extends StatelessWidget {
       }
     }
 
+    final picker = ImagePicker();
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -78,6 +80,83 @@ class AuthScreen extends StatelessWidget {
                   child: Container(
                     child: Column(
                       children: [
+                        if (Provider.of<AuthProvider>(context, listen: true)
+                            .is_login)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 20.0),
+                            child: Center(
+                              child: CircleAvatar(
+                                backgroundImage:
+                                    Provider.of<AuthProvider>(context)
+                                                .finalImage ==
+                                            null
+                                        ? null
+                                        : FileImage(
+                                            Provider.of<AuthProvider>(context)
+                                                .finalImage,
+                                          ),
+                                backgroundColor: Colors.black12,
+                                radius: 50,
+                              ),
+                            ),
+                          ),
+                        if (Provider.of<AuthProvider>(context, listen: true)
+                            .is_login)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              FlatButton.icon(
+                                  onPressed: () {
+                                    picker
+                                        .getImage(source: ImageSource.camera)
+                                        .then((value) {
+                                      if (value != null) {
+                                        Provider.of<AuthProvider>(context,
+                                                listen: false)
+                                            .setImage(value.path);
+                                      } else {
+                                        print('No image selected.');
+                                      }
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.camera_alt,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  label: Text(
+                                    "take image\nby camera",
+                                    softWrap: true,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: Theme.of(context).primaryColor),
+                                  )),
+                              FlatButton.icon(
+                                  onPressed: () {
+                                    picker
+                                        .getImage(source: ImageSource.gallery)
+                                        .then((value) {
+                                      if (value != null) {
+                                        Provider.of<AuthProvider>(context,
+                                                listen: false)
+                                            .setImage(value.path);
+                                      } else {
+                                        print('No image selected.');
+                                      }
+                                    });
+                                  },
+                                  icon: Icon(
+                                    Icons.image,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  label: Text(
+                                    "get from \ngallery",
+                                    softWrap: true,
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: Theme.of(context).primaryColor),
+                                  ))
+                            ],
+                          ),
                         Container(
                           margin: EdgeInsets.only(left: 10, right: 10, top: 20),
                           child: TextField(
