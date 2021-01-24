@@ -3,6 +3,7 @@ import 'package:chat_flutter_ezzat_app/screen/auth_screen.dart';
 import 'package:chat_flutter_ezzat_app/screen/chat_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,11 +16,17 @@ void main() {
 
 class MyApp extends StatelessWidget {
 
-  bool is_login=false;
+  bool is_login = false;
+  FirebaseMessaging firebaseMessaging = FirebaseMessaging();
 
-
-  MyApp(){
-
+  MyApp() {
+    firebaseMessaging.configure(onMessage: (msg) {
+      print("on messages  $msg");
+    }, onResume: (msg) {
+      print("on resume  $msg");
+    }, onLaunch: (msg) {
+      print("on launch  $msg");
+    });
   }
 
   @override

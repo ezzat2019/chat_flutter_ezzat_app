@@ -50,7 +50,8 @@ class NewMessage extends StatelessWidget {
                           "message": message,
                           "date": Timestamp.now(),
                           "name": name,
-                          "uid": value.id
+                          "uid": value.id,
+                          "img": value["img"]
                         });
                         messgae_controler.clear();
                       }

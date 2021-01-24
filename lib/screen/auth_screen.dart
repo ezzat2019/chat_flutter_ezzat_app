@@ -2,6 +2,7 @@ import 'package:chat_flutter_ezzat_app/provideres/auth_provider.dart';
 import 'package:chat_flutter_ezzat_app/screen/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:toast/toast.dart';
 
 class AuthScreen extends StatelessWidget {
+  final Reference storage = FirebaseStorage.instance.ref("images");
   final email_controler = TextEditingController();
   final user_controler = TextEditingController();
   final pass_controler = TextEditingController();
@@ -87,14 +89,14 @@ class AuthScreen extends StatelessWidget {
                             child: Center(
                               child: CircleAvatar(
                                 backgroundImage:
-                                    Provider.of<AuthProvider>(context)
-                                                .finalImage ==
-                                            null
-                                        ? null
-                                        : FileImage(
-                                            Provider.of<AuthProvider>(context)
-                                                .finalImage,
-                                          ),
+                                Provider.of<AuthProvider>(context)
+                                    .finalImage ==
+                                    null
+                                    ? null
+                                    : FileImage(
+                                  Provider.of<AuthProvider>(context)
+                                      .finalImage,
+                                ),
                                 backgroundColor: Colors.black12,
                                 radius: 50,
                               ),
@@ -108,11 +110,15 @@ class AuthScreen extends StatelessWidget {
                               FlatButton.icon(
                                   onPressed: () {
                                     picker
-                                        .getImage(source: ImageSource.camera)
+                                        .getImage(
+                                            source: ImageSource.camera,
+                                            maxWidth: 200,
+                                            maxHeight: 200,
+                                            imageQuality: 80)
                                         .then((value) {
                                       if (value != null) {
                                         Provider.of<AuthProvider>(context,
-                                                listen: false)
+                                            listen: false)
                                             .setImage(value.path);
                                       } else {
                                         print('No image selected.');
@@ -133,11 +139,15 @@ class AuthScreen extends StatelessWidget {
                               FlatButton.icon(
                                   onPressed: () {
                                     picker
-                                        .getImage(source: ImageSource.gallery)
+                                        .getImage(
+                                            source: ImageSource.gallery,
+                                            maxWidth: 200,
+                                            maxHeight: 200,
+                                            imageQuality: 80)
                                         .then((value) {
                                       if (value != null) {
                                         Provider.of<AuthProvider>(context,
-                                                listen: false)
+                                            listen: false)
                                             .setImage(value.path);
                                       } else {
                                         print('No image selected.');
@@ -162,6 +172,7 @@ class AuthScreen extends StatelessWidget {
                           child: TextField(
                             controller: email_controler,
                             keyboardType: TextInputType.emailAddress,
+                            textCapitalization: TextCapitalization.none,
                             decoration: InputDecoration(
                                 labelText: "Email",
                                 hintText: "enter your email",
@@ -172,7 +183,7 @@ class AuthScreen extends StatelessWidget {
                             .is_login)
                           Container(
                             margin:
-                                EdgeInsets.only(left: 10, right: 10, top: 20),
+                            EdgeInsets.only(left: 10, right: 10, top: 20),
                             child: TextField(
                               controller: user_controler,
                               keyboardType: TextInputType.emailAddress,
@@ -206,7 +217,7 @@ class AuthScreen extends StatelessWidget {
                               String user = user_controler.text.toString();
                               String pass = pass_controler.text.toString();
                               if (!Provider.of<AuthProvider>(context,
-                                      listen: false)
+                                  listen: false)
                                   .is_login) {
                                 if (email.isEmpty) {
                                   Toast.show(
@@ -241,15 +252,21 @@ class AuthScreen extends StatelessWidget {
                                   return;
                                 }
                                 Provider.of<AuthProvider>(context,
-                                        listen: false)
+                                    listen: false)
                                     .set_is_progress_show(
-                                        !Provider.of<AuthProvider>(context,
-                                                listen: false)
-                                            .is_progress_show);
+                                    !Provider.of<AuthProvider>(context,
+                                        listen: false)
+                                        .is_progress_show);
 
                                 SignIn(email.trim(), pass.trim(), context)
                                     .then((value) {
                                   if (value == null) {
+                                    Provider.of<AuthProvider>(context,
+                                            listen: false)
+                                        .set_is_progress_show(
+                                            !Provider.of<AuthProvider>(context,
+                                                    listen: false)
+                                                .is_progress_show);
                                     Provider.of<AuthProvider>(context,
                                             listen: false)
                                         .set_is_login(
@@ -259,16 +276,16 @@ class AuthScreen extends StatelessWidget {
                                   } else {
                                     Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(builder: (_) {
-                                      Provider.of<AuthProvider>(context,
+                                          Provider.of<AuthProvider>(context,
                                               listen: false)
-                                          .set_is_progress_show(
+                                              .set_is_progress_show(
                                               !Provider.of<AuthProvider>(
-                                                      context,
-                                                      listen: false)
+                                                  context,
+                                                  listen: false)
                                                   .is_progress_show);
 
-                                      return ChatScreen();
-                                    }));
+                                          return ChatScreen();
+                                        }));
                                   }
                                 });
                               } else {
@@ -309,47 +326,69 @@ class AuthScreen extends StatelessWidget {
 
                                   return;
                                 }
+                                if (Provider.of<AuthProvider>(context,
+                                            listen: false)
+                                        .finalImage ==
+                                    null) {
+                                  Toast.show(
+                                      "please scelect image first", context,
+                                      duration: Toast.LENGTH_LONG);
+
+                                  return;
+                                }
                                 Provider.of<AuthProvider>(context,
                                         listen: false)
                                     .set_is_progress_show(
                                         !Provider.of<AuthProvider>(context,
                                                 listen: false)
                                             .is_progress_show);
+                                storage
+                                    .child(DateTime.now().toString())
+                                    .putFile(Provider.of<AuthProvider>(context,
+                                            listen: false)
+                                        .finalImage)
+                                    .catchError((err) {
+                                  Toast.show(err.toString(), context);
+                                }).then((value) {
+                                  value.ref.getDownloadURL().then((value) {
+                                    String img_url = value;
+                                    signup(email.trim(), user.trim(),
+                                            pass.trim(), context)
+                                        .then((value) {
+                                      if (value != null) {
+                                        FirebaseFirestore.instance
+                                            .collection("users")
+                                            .doc(value.user.uid)
+                                            .set({
+                                          "email": email,
+                                          "name": user,
+                                          "img": img_url
+                                        }).then((vv) {
+                                          Navigator.of(context).pushReplacement(
+                                              MaterialPageRoute(builder: (_) {
+                                            Provider.of<AuthProvider>(context,
+                                                    listen: false)
+                                                .set_is_progress_show(
+                                                    !Provider.of<AuthProvider>(
+                                                            context,
+                                                            listen: false)
+                                                        .is_progress_show);
 
-                                signup(email.trim(), user.trim(), pass.trim(),
-                                        context)
-                                    .then((value) {
-                                  if (value != null) {
-                                    FirebaseFirestore.instance
-                                        .collection("users")
-                                        .doc(value.user.uid)
-                                        .set({
-                                      "email": email,
-                                      "name": user
-                                    }).then((vv) {
-                                      Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(builder: (_) {
-                                        Provider.of<AuthProvider>(context,
-                                                listen: false)
-                                            .set_is_progress_show(
-                                                !Provider.of<AuthProvider>(
-                                                        context,
-                                                        listen: false)
-                                                    .is_progress_show);
-
-                                        return ChatScreen();
-                                      }));
-                                    }).catchError((e) {
-                                      Toast.show(e.toString(), context);
+                                            return ChatScreen();
+                                          }));
+                                        }).catchError((e) {
+                                          Toast.show(e.toString(), context);
+                                        });
+                                      }
                                     });
-                                  }
+                                  });
                                 });
                               }
                             },
                             textColor: Colors.white,
                             child: Text(
                               Provider.of<AuthProvider>(context, listen: false)
-                                      .is_login
+                                  .is_login
                                   ? "Sign up"
                                   : "Login",
                               style: TextStyle(fontSize: 18),
@@ -359,7 +398,7 @@ class AuthScreen extends StatelessWidget {
                         InkWell(
                           onTap: () {
                             bool val = !Provider.of<AuthProvider>(context,
-                                    listen: false)
+                                listen: false)
                                 .is_login;
                             Provider.of<AuthProvider>(context, listen: false)
                                 .set_is_login(val);
@@ -368,8 +407,8 @@ class AuthScreen extends StatelessWidget {
                               margin: EdgeInsets.all(10),
                               child: Text(
                                 !Provider.of<AuthProvider>(context,
-                                            listen: false)
-                                        .is_login
+                                    listen: false)
+                                    .is_login
                                     ? "Create new account"
                                     : "I have already have an account",
                                 style: TextStyle(

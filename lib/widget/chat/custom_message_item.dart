@@ -4,8 +4,9 @@ class CustomMessageItem extends StatelessWidget {
   final name;
   final message;
   final is_me;
+  final img;
 
-  CustomMessageItem(this.name, this.message, this.is_me);
+  CustomMessageItem(this.name, this.message, this.is_me, this.img);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +17,7 @@ class CustomMessageItem extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-                color: is_me ? Colors.white : Theme.of(context).accentColor,
+                color: is_me ? Colors.white : Theme.of(context).primaryColor,
                 borderRadius: is_me
                     ? BorderRadius.only(
                         topLeft: Radius.circular(12),
@@ -33,20 +34,40 @@ class CustomMessageItem extends StatelessWidget {
                 crossAxisAlignment:
                     is_me ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    style: TextStyle(
-                        color: is_me ? Colors.black : Colors.white,
-                        fontSize: 18),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      message,
-                      style: TextStyle(
-                          color: is_me ? Colors.black : Colors.white,
-                          fontSize: 15),
-                    ),
+                  Row(
+                    children: [
+                      if (!is_me)
+                        CircleAvatar(
+                          maxRadius: 20,
+                          backgroundColor: Colors.black12,
+                          backgroundImage: NetworkImage(img),
+                        ),
+                      Column(
+                        children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                                color: is_me ? Colors.black : Colors.white,
+                                fontSize: 18),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              message,
+                              style: TextStyle(
+                                  color: is_me ? Colors.black : Colors.white,
+                                  fontSize: 15),
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (is_me)
+                        CircleAvatar(
+                          maxRadius: 20,
+                          backgroundColor: Colors.black12,
+                          backgroundImage: NetworkImage(img),
+                        ),
+                    ],
                   ),
                 ],
               ),

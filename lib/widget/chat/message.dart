@@ -25,11 +25,17 @@ class Message extends StatelessWidget {
                 itemBuilder: (_, index) {
                   if (FirebaseAuth.instance.currentUser.uid ==
                       snap.data.docs[index]["uid"]) {
-                    return CustomMessageItem(snap.data.docs[index]["name"],
-                        snap.data.docs[index]["message"], true);
+                    return CustomMessageItem(
+                        snap.data.docs[index]["name"],
+                        snap.data.docs[index]["message"],
+                        true,
+                        snap.data.docs[index]["img"]);
                   } else {
-                    return CustomMessageItem(snap.data.docs[index]["name"],
-                        snap.data.docs[index]["message"], false);
+                    return CustomMessageItem(
+                        snap.data.docs[index]["name"],
+                        snap.data.docs[index]["message"],
+                        false,
+                        snap.data.docs[index]["img"]);
                   }
                 });
         });
