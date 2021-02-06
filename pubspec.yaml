@@ -21,6 +21,7 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  flutter_launcher_icons: ^0.8.1
   firebase_messaging:
   firebase_storage: "^7.0.0"
   image_picker: ^0.6.7+21
@@ -44,6 +45,10 @@ dev_dependencies:
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/chat_icon.jpg"
 # The following section is specific to Flutter.
 flutter:
 
